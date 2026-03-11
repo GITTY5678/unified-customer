@@ -130,7 +130,8 @@ export default function CustomerDashboard() {
 }
 
 function NewTicketModal({ onClose, onCreated }) {
-  const [form, setForm] = useState({ subject: '', description: '', priority: 'medium' })
+  const { user } = useAuth()
+  const [form, setForm] = useState({ subject: '', priority: 'medium', channel: 'web' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -138,7 +139,12 @@ function NewTicketModal({ onClose, onCreated }) {
     if (!form.subject.trim()) { setError('Subject is required'); return }
     setLoading(true)
     try {
-      await api.post('/tickets/', form)
+      await api.post('/tickets/', {
+        subject: form.subject,
+        priority: form.priority,
+        channel: form.channel,
+        customer_id: user.customer_id,
+      })
       onCreated(); onClose()
     } catch (e) { setError(e.response?.data?.detail || 'Failed to submit ticket') }
     finally { setLoading(false) }
@@ -153,16 +159,25 @@ function NewTicketModal({ onClose, onCreated }) {
         <h2 style={{ fontSize: '17px', fontWeight: 700, marginBottom: '4px' }}>Submit a Support Ticket</h2>
         <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginBottom: '20px' }}>Describe your issue and our team will get back to you.</p>
         {error && <div style={{ background: 'var(--color-danger-light)', color: 'var(--color-danger)', padding: '10px 13px', borderRadius: '9px', fontSize: '13px', marginBottom: '14px' }}>{error}</div>}
+        
         <label style={lbl2}>Subject *</label>
         <input style={inp2} placeholder="Brief summary of your issue" value={form.subject} onChange={e => setForm({ ...form, subject: e.target.value })} />
-        <label style={lbl2}>Description</label>
-        <textarea style={{ ...inp2, height: '90px', resize: 'vertical' }} placeholder="Describe the issue in detail..." value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} />
+        
+        <label style={lbl2}>Channel</label>
+        <select style={inp2} value={form.channel} onChange={e => setForm({ ...form, channel: e.target.value })}>
+          <option value="web">Web</option>
+          <option value="email">Email</option>
+          <option value="phone">Phone</option>
+          <option value="whatsapp">WhatsApp</option>
+        </select>
+
         <label style={lbl2}>Priority</label>
         <select style={inp2} value={form.priority} onChange={e => setForm({ ...form, priority: e.target.value })}>
           <option value="low">Low — general question</option>
           <option value="medium">Medium — some impact</option>
           <option value="high">High — urgent issue</option>
         </select>
+
         <div style={{ display: 'flex', gap: '10px', marginTop: '4px' }}>
           <button onClick={onClose} style={{ flex: 1, padding: '10px', borderRadius: '9px', border: '1.5px solid var(--color-border)', background: 'none', fontSize: '14px', fontWeight: 600, color: 'var(--color-text-secondary)', cursor: 'pointer' }}>Cancel</button>
           <button onClick={handleSubmit} disabled={loading} style={{ flex: 1, padding: '10px', borderRadius: '9px', background: 'var(--color-accent)', color: '#fff', border: 'none', fontSize: '14px', fontWeight: 600, cursor: 'pointer', opacity: loading ? 0.7 : 1 }}>

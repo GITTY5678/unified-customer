@@ -5,6 +5,7 @@ from app.schemas.ticket import TicketCreate, TicketUpdate, TicketOut
 from app.services.ticket_service import create_ticket, get_tickets, get_ticket, update_ticket, delete_ticket
 from app.core.dependencies import get_db, get_current_user
 from app.models.user import User
+from app.models.ticket import Ticket
 
 router = APIRouter(prefix="/tickets", tags=["Tickets"])
 
@@ -18,6 +19,12 @@ def list_tickets(
     _: User = Depends(get_current_user),
 ):
     return get_tickets(db, channel, status, priority, agent_id)
+@router.get("/my", response_model=List[TicketOut])
+def my_tickets(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    return db.query(Ticket).filter(Ticket.customer_id == current_user.id).all()
 
 @router.post("/", response_model=TicketOut)
 def create(req: TicketCreate, db: Session = Depends(get_db), _: User = Depends(get_current_user)):

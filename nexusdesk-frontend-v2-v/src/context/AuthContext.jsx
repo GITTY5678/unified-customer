@@ -30,6 +30,7 @@ export function AuthProvider({ children }) {
     // Backend returns name, role, user_id directly in TokenResponse — no /users/me needed
     const userData = {
       id: user_id,
+      customer_id: customer_id,  // add this
       email,
       name,
       full_name: name,   // alias so existing UI using full_name still works

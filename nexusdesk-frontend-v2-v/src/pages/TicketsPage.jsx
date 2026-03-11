@@ -173,8 +173,9 @@ export default function TicketsPage() {
   )
 }
 
-function CreateTicketModal({ onClose, onCreated }) {
-  const [form, setForm] = useState({ subject: '', description: '', priority: 'medium', customer_id: '' })
+function NewTicketModal({ onClose, onCreated }) {
+  const { user } = useAuth()
+  const [form, setForm] = useState({ subject: '', priority: 'medium', channel: 'web' })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -183,16 +184,14 @@ function CreateTicketModal({ onClose, onCreated }) {
     setLoading(true)
     try {
       await api.post('/tickets/', {
-        ...form,
-        customer_id: form.customer_id ? parseInt(form.customer_id) : undefined,
+        subject: form.subject,
+        priority: form.priority,
+        channel: form.channel,
+        customer_id: user.id,
       })
-      onCreated()
-      onClose()
-    } catch (e) {
-      setError(e.response?.data?.detail || 'Failed to create ticket')
-    } finally {
-      setLoading(false)
-    }
+      onCreated(); onClose()
+    } catch (e) { setError(e.response?.data?.detail || 'Failed to submit ticket') }
+    finally { setLoading(false) }
   }
 
   return (

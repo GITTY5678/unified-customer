@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import auth, tickets, messages, agents, ai, websocket
+from app.routers import auth, tickets, messages, agents, ai, websocket, customers
 from app.db.init_db import init_db
 
 app = FastAPI(
@@ -9,7 +9,7 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS — allow your React frontend
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:5173"],
@@ -25,6 +25,7 @@ app.include_router(messages.router)
 app.include_router(agents.router)
 app.include_router(ai.router)
 app.include_router(websocket.router)
+app.include_router(customers.router)
 
 @app.on_event("startup")
 def startup():

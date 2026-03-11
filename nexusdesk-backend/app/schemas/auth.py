@@ -17,3 +17,4 @@ class TokenResponse(BaseModel):
     user_id:      int
     name:         str
     role:         str
+    customer_id:  int | None = None  # add this line
